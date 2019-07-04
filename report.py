@@ -64,7 +64,7 @@ class ColumnSummary:
         q1 = self.lower_quantile()
         q3 = self.upper_quantile()
         print(f"""mean:\t{mean}\nmode:\t{mode}""")
-        
+
     def mean(self):
         return self.data.mean()
 
