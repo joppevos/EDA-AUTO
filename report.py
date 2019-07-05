@@ -1,31 +1,38 @@
 from seaborn import load_dataset
-import pandas
+import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# features = df.columns.tolist()
 df = load_dataset('titanic')
 feature = 'age'
 
 
 class ColumnSummary:
-    def __init__(self, name, data):
-        self.name = name
+    def __init__(self, data):
         self.data = data
 
+    def statistic_summary(self):
+        if not self.dtype_is_object():
+            return [f'Min: {self.min()}']
+
+
     def num_of_values(self):
-        """ number of individual values"""
+        """ number of unique values"""
         return len(self.data.value_counts().to_list())
 
-    def value_count_summary(self):
-        """ summary of the value counts"""
-        count = self.data.count()
-        num_of_values = self.num_of_values()
-        missing_values = df[feature].isna().sum()
-        print(f'Total Values:\t{count}\nUnique values:\t{num_of_values}\nMissing values:\t{missing_values}')
+    def missing_values(self):
+        """ return number of missing values"""
+        missing_values = self.data.isna().sum()
+        return missing_values
 
-    def type_for_operation(self):
+    def dtype_is_object(self):
+        if self.data.dtype in ('int64', 'float64', 'int32', 'float32'):
+            return False
+        else:
+            return True
+
+    def data_type(self):
         """:return string of datatype"""
         values = self.num_of_values()
         if self.data.dtype in ('int64', 'float64', 'int32', 'float32'):
@@ -56,43 +63,122 @@ class ColumnSummary:
     def remove_nan_values(self):
         return self.data.dropna().copy()
 
-    def statistics_summary(self):
-        mean = self.mean()
-        mode = self.mode()
-        min = self.min()
-        max = self.max()
-        q1 = self.lower_quantile()
-        q3 = self.upper_quantile()
-        print(f"""mean:\t{mean}\nmode:\t{mode}""")
+    def outliers(self):
+        """:return number of outliers 1.5x the interquartile range"""
+        if not self.dtype_is_object():
+            data_clean = self.remove_nan_values()
+            q1 = self.q1()
+            q3 = self.q3()
+            iqr = self.q3()-self.q1()
+            cut_off = iqr * 1.5
+            lower, upper = q1 - cut_off, q3 + cut_off
+            mask = data_clean.between(lower, upper)
+            data_between = data_clean[mask]
+            outliers = len(data_clean) - len(data_between)
+            return outliers
+        return 'No outliers'
 
     def mean(self):
         return self.data.mean()
 
     def mode(self):
-        return self.data.mode().values[0]
+        return self.data.mode()
 
     def min(self):
-        return self.data.min().values[0]
+        return self.data.min()
 
     def max(self):
-        return self.data.max().values[0]
+        return self.data.max()
 
-    def lower_quantile(self):
+    def q1(self):
         return self.data.quantile(q=.25)
 
-    def upper_quantile(self):
+    def q3(self):
         return self.data.quantile(q=0.75)
 
+serie = pd.Series([100,30,25,5,1,1,1,1,1,1,1,10000])
+# summary = ColumnSummary(data=df[feature])
+page = """<!DOCTYPE html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="custom.css">
+    <link href="custom.css" rel="stylesheet">
+  </head>
+</html>
+<head>
+	<meta charset="UTF-8">
+</head>
+<body>
+  <div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <h4>Size of dataframe: 0</h4>
+    </div>
+    <div class="col-sm">
+      One of three columns
+    </div>
+    <div class="col-sm">
+      One of three columns
+    </div>
+    </div>
+  </div>
+	<table class="table table-hover table-striped" style=".table">
+      <thead>
+        <tr>
+          <th width="10%" align="left" scope="col">Name</th>
+          <th width="10%" align="left"  scope="col">Data Type</th>
+          <th width="10%" align="left"  scope="col">Histogram</th>
+          <th width="10%" align="left"  scope="col">Observations</th>
+          <th width="10%" align="left"  scope="col">Stats</th>
+          <th width="10%" align="left"  scope="col">Outliers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td width="10%" align="left">atext</td>
+          <td width="10%" align="left"> atext</td>
+          <td><img class="img-fluid" src="https://i.stack.imgur.com/0VrsZ.png" style="width:400px"> </td>
+          <td>
+            <h5>mean:<br>mode:<br><br>min:<br>max:<br><br>lower bound:<br>upper bound:</h5>
+          </td>
+          <td>
+            <h5>30 missing values<br></h5>
+          </td>
+          <td>outliers:<br>extreme outliers:</td>
+        </tr>
+"""
+end_page = """  
+</tbody>
+</table>
+</body>
+"""
+rows_html = []
+for column in df.columns.to_list():
+    Summary = ColumnSummary(data=df[column])
+    datatype = Summary.data_type()
+    missing = Summary.missing_values()
+    stats = Summary.statistic_summary()
+    outliers = Summary.outliers()
+    html = f"""
+    <tr>
+      <td width="10%" align="left"> {column}</td>
+      <td width="10%" align="left"> {datatype}</td>
+      <td><img class="img-fluid" src="https://i.stack.imgur.com/0VrsZ.png" style="width:400px"> </td>
+      <td>{missing}</td>
+      <td>{stats}</td>
+      <td>{outliers}</td>
+    </tr>
+    """
+    rows_html.append(html)
 
-summary = ColumnSummary(data=df[feature], name=feature)
-# summary.statistics_summary()
-print(summary.mode())
-# summary.create_histogram()
-# for every column
-# for value in df.columns.value:
-# show the first 4 values
-# report the number of appereances
-# type of dtype
-# report a matplot graph
-# statistical values. mean min, max, up, low, quartiles and outliers
-# report NaN values
+
+merged_html = page + "".join(rows_html) + end_page
+with open("seenopsis_output.html", "w") as html_file:
+    html_file.write(merged_html)
+    html_file.close()

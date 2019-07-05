@@ -3,3 +3,10 @@
     vertical-align: middle;
     border-top: 1px solid #dee2e6;
 }
+
+.columns-container {
+display: table-cell;
+height: 100%;
+width:600px;
+text-align: center;
+}
