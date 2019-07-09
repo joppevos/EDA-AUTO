@@ -2,31 +2,39 @@ from collections import namedtuple
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from seaborn import load_dataset
+from seaborn import load_dataset, get_dataset_names
 from IPython.core.display import display, HTML
 import os
+import time
+import shutil
+import random
+
 
 class Edas:
-
     def __init__(self, data):
-        if isinstance(dataframe, pd.DatFrame):
+        if isinstance(data, pd.DataFrame):
             self.df = data
-        elif isintance(data, str):
+        elif isinstance(data, str):
             _, file_extension = os.path.splitext(data)
-            if file_extension == ('.csv'):
-                self.df = pd.read_csv(path_csv)
-            elif file_extension == ('.exc'):
-                self.df = pd.read_excel(path_csv)
-        else:
-            "Unable to open file"
-
-        self.df = pd.read_csv(path_csv)
+            if file_extension == '.csv':
+                self.df = pd.read_csv(data)
+            elif file_extension == '.xlsx':
+                self.df = pd.read_excel(data)
+            else:
+                raise FileNotFoundError
         self.write_html_report()
         self.display_html_report()
+        self.empty_directory()
 
-    def display_html_report(self):
+    @staticmethod
+    def display_html_report():
         """ display the written hml"""
         display(HTML('report_page.html'))
+
+    def empty_directory(self):
+        time.sleep(5)
+        shutil.rmtree('hist_images')
+        os.mkdir('hist_images')
 
     def write_html_report(self):
         html_page = self.create_html_layout()
@@ -90,7 +98,8 @@ class Edas:
             <tr>
               <td style="font-size: 15px;" width="10%" align="left"> {column}</td>
               <td style="font-size: 15px;"width="10%" align="left"> {datatype}</td>
-              <td><img class="img-fluid" src="hist_images/histogram{i}.png" style="width:800px"> </td>
+              <td><img class="img-fluid" src="hist_images/histogram{i}.png?{random.randint(0,
+                                                                                           2e9)}" style="width:800px"> </td>
               <td style="font-size: 15px;">mean: {stats.mean}<br>
                   mode: {stats.mode}<br><br>
                   min: {stats.min}<br>
@@ -168,24 +177,32 @@ class ColumnSummary:
         create a distribution plot from data without missing values
         :param i: iteration for each histogram
         """
-        fig, ax = plt.subplots(1, 1, figsize=(10, 10), dpi=100)
-        sns.set(style="whitegrid")
-        if self.dtype_is_object() or self.num_of_values() <= 10:
-            sns.countplot(self.remove_nan_values())
-        else:
-            sns.distplot(self.remove_nan_values())
         # styling
-        ax.set_xlabel('')
-        ax.set_ylabel('')
-        font = {'weight': 'bold'}
+        sns.set(style="whitegrid")
+        font = {'weight': 'normal'}
         plt.rc('font', **font)
-        plt.rc('axes', labelsize=30)  # fontsize of the x and y labels
-        plt.rc('xtick', labelsize=30)  # fontsize of the tick labels
-        plt.rc('ytick', labelsize=30)
+        plt.rc('axes', labelsize=25)  # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=25)  # fontsize of the tick labels
+        plt.rc('ytick', labelsize=25)
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5), dpi=100)
+
+        try:
+            if self.dtype_is_object() or self.num_of_values() <= 15:
+                if self.num_of_values() > 15:
+                    data = pd.to_numeric(self.data, errors='coerce')
+                    plot = sns.distplot(data.dropna())
+                else:
+                    plot = sns.countplot(self.remove_nan_values())
+            else:
+                plot = sns.distplot(self.remove_nan_values())
+        except Exception:
+            plt.text(0.5, 0.5, f'Unable to plot', ha='center', va='center', transform=ax.transAxes, fontsize=16)
         if not os.path.isdir('hist_images'):
             os.mkdir('hist_images')
+        plot.set(xlabel='', ylabel='')
         plt.savefig(f'hist_images/histogram{i}.png', bbox_inches='tight')
         plt.close()
+        plt.clf()
 
     def remove_nan_values(self):
         return self.data.dropna().copy()
@@ -225,7 +242,7 @@ class ColumnSummary:
     def q3(self):
         return self.data.quantile(q=0.75)
 
-# df = load_dataset('titanic')
-df = 'diamonds.csv'
 
-Edas(df)
+if __name__ == '__main__':
+    df = load_dataset('car_crashes')
+    Edas(df)
