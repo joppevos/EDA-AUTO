@@ -12,6 +12,9 @@ import random
 
 class Edas:
     def __init__(self, data):
+        """
+        :param data: path to csv,xlsx or pandas dataframe
+        """
         if isinstance(data, pd.DataFrame):
             self.df = data
         elif isinstance(data, str):
@@ -28,10 +31,11 @@ class Edas:
 
     @staticmethod
     def display_html_report():
-        """ display the written hml"""
+        """ display the written html in jupyter notebook"""
         display(HTML('report_page.html'))
 
-    def empty_directory(self):
+    @staticmethod
+    def empty_directory():
         time.sleep(5)
         shutil.rmtree('hist_images')
         os.mkdir('hist_images')
@@ -118,6 +122,9 @@ class Edas:
 
 class ColumnSummary:
     def __init__(self, data):
+        """
+        :param data: pandas.Series
+        """
         self.data = data
 
     def statistic_summary(self):
@@ -174,8 +181,8 @@ class ColumnSummary:
 
     def create_histogram(self, i):
         """
-        create a distribution plot from data without missing values
-        :param i: iteration for each histogram
+        create a plot from the data serie
+        :param i: iteration for each histogram ot make unique
         """
         # styling
         sns.set(style="whitegrid")
@@ -185,7 +192,6 @@ class ColumnSummary:
         plt.rc('xtick', labelsize=25)  # fontsize of the tick labels
         plt.rc('ytick', labelsize=25)
         fig, ax = plt.subplots(1, 1, figsize=(5, 5), dpi=100)
-
         try:
             if self.dtype_is_object() or self.num_of_values() <= 15:
                 if self.num_of_values() > 15:
@@ -195,11 +201,11 @@ class ColumnSummary:
                     plot = sns.countplot(self.remove_nan_values())
             else:
                 plot = sns.distplot(self.remove_nan_values())
+            plot.set(xlabel='', ylabel='')
         except Exception:
             plt.text(0.5, 0.5, f'Unable to plot', ha='center', va='center', transform=ax.transAxes, fontsize=16)
         if not os.path.isdir('hist_images'):
             os.mkdir('hist_images')
-        plot.set(xlabel='', ylabel='')
         plt.savefig(f'hist_images/histogram{i}.png', bbox_inches='tight')
         plt.close()
         plt.clf()
