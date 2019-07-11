@@ -2,4 +2,11 @@
 
 Edas is a simple data exploration tool for jupyter notebook.
 
+#### Installation 
 ``` pip install Edas```
+
+#### Usage
+import Edas
+
+Edas('titanic.csv')
+
