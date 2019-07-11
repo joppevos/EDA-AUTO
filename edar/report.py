@@ -2,7 +2,6 @@ from collections import namedtuple
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from seaborn import load_dataset, get_dataset_names
 from IPython.core.display import display, HTML
 import os
 import time
@@ -10,7 +9,7 @@ import shutil
 import random
 
 
-class Edas:
+class Report:
     def __init__(self, data):
         """
         :param data: path to csv,xlsx or pandas dataframe
@@ -65,7 +64,7 @@ class Edas:
           <div class="container">
           <div class="row">
             <div class="col-sm">
-              <h4>Edas report: Exploratory data analysis</h4>
+              <h4>eda report: Exploratory data analysis</h4>
             </div>
             <div class="col-sm">
               <h3>Inspecting dataframe of size: {size}
@@ -247,8 +246,3 @@ class ColumnSummary:
 
     def q3(self):
         return self.data.quantile(q=0.75)
-
-
-if __name__ == '__main__':
-    df = load_dataset('car_crashes')
-    Edas(df)
