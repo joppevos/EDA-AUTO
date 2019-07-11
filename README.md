@@ -4,10 +4,12 @@ Edas is a simple data exploration tool for jupyter notebook.
 It gives you quick insight in your dataset by creating a html generated report with details about each column
 
 #### Installation 
-``` pip install datareport```
+``` 
+pip install edar
+```
 
 #### Usage
-import Edas
-
-Edas('titanic.csv')
-
+```
+from edar import Report
+Report('titanic.csv')
+```
