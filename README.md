@@ -13,3 +13,4 @@ pip install edar
 from edar import Report
 Report('titanic.csv')
 ```
+![Screenshot from 2019-07-11 18-39-29](https://user-images.githubusercontent.com/44348300/61111572-2f72b700-a48a-11e9-9990-0e0872ca2137.png)
