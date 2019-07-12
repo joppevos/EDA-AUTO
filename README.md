@@ -4,12 +4,12 @@
 Edar is a simple data exploration tool for jupyter notebook.
 It displays a html report from your data to get a quick overview.
 
-#### Installation 
+### Installation 
 ``` 
 pip install edar
 ```
 
-#### Usage
+### Usage
 ```
 from edar import Report
 Report('titanic.csv')
